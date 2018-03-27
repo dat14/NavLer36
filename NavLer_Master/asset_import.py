@@ -12,10 +12,7 @@ import glob
 import cv2
 import scipy
 import os
-import Cython
 from distutils.core import setup
-from Cython.Build import cythonize
-from ctypes import *
 
 import tensorflow as tf
 import numpy as np
@@ -23,6 +20,7 @@ import numpy as np
 import random
 
 import numpy as np
+from PIL import Image
 from matplotlib import *
 from scipy.misc import imread, imsave
 from tensorflow.contrib.learn.python.learn.datasets import base
