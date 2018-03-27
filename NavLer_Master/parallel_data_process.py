@@ -60,18 +60,8 @@ def preprocess1(images):
     with tf.device('/cpu:0'):
         for i in tqdm(range(len(images))):
             X = cv2.imread(images[i])
-            # X = cv2.resize(X, (0,0), fx=0.4, fy=0.4)
             images_out1.append(X)
-        # compute images mean
-        #		N = 0
-        #		meanke = np.zeros((1, 3, 240, 320))
-        #		for X in tqdm(images_out1):
-        #			meanke[0][0] += X[:,:,0]
-        #			meanke[0][1] += X[:,:,1]
-        #			meanke[0][2] += X[:,:,2]
-        #			N += 1
-        #		meanke[0] /= N
-        return images_out1,  # meanke
+        return images_out1
 
 
 def preprocess2(images_cropped, numberke):
