@@ -1,7 +1,7 @@
 from asset_import import *
 
 batch_size = 32
-max_iterations = 20
+max_iterations = 200
 
 # Set this path to your dataset directory
 path = "C:/Users/trand/Desktop/PseudoCorridor/Merged/"
@@ -52,35 +52,16 @@ def centeredCrop(img, output_side_length1, output_side_length2):
     return cropped_img
 
 
-def preprocess1(images):
-    images_out1 = []  # semi results
-    images_cropped = []
-    mean = []
+def preprocess(image):
     # Resize and crop and compute mean!
     with tf.device('/cpu:0'):
-        for i in tqdm(range(len(images))):
-            X = cv2.imread(images[i])
-            images_out1.append(X)
-        return images_out1
+            image_out = cv2.imread(image)
+        return image_out
 
 
-def preprocess2(images_cropped, numberke):
-    images_out2 = []  # final results
-    with tf.device('/cpu:0'):
-        # Subtract mean from all images
-        for X in tqdm(images_cropped):
-            X = np.transpose(X, (2, 0, 1))
-            X = X - numberke
-            X = np.squeeze(X)
-            X = np.transpose(X, (1, 2, 0))
-            images_out2.append(X)
-        return images_out2
-
-
-def get_data1():
+def get_data():
     poses = []
-    images1 = []
-    images2 = []
+    images_list = []
     with open(directory + dataset) as f:
         for line in tqdm(f):
             fname, p0, p1, p2, p3, p4 = line.split(',')
@@ -96,65 +77,8 @@ def get_data1():
             poses.append([p0, p1, p2, p3, p4
                           # ,p5,p6
                           ])
-            images1.append(directory + fname)
-    #	images2, mean = preprocess1(images1) #readin, crop, mean
-    images2 = preprocess1(images1)  # readin, crop, mean
-    #	return images2, mean, poses
-    return datasource(images2, poses)
-
-
-def get_data2(images, mean, position):
-    images3 = []
-    images3 = preprocess2(images, mean)  # subtract
-    return datasource(images3, position)
-
-
-"""%%cython
-from libc.math cimport log
-from libcpp.list cimport list as cpplist
-def bubli(char t):
-
-    cdef cpplist[char] temp
-
-    push_back = temp.push_back
-    for x in range(t):
-        if x> 0:
-            push_back(x)
-
-    cdef int N = temp.size()
-    cdef list OutputList = N*[0]
-
-    front = temp.front()
-    pop_front = temp.pop_front()
-    for i in range(N):
-        OutputList[i] = front()
-        pop_front()
-
-    return OutputList  """
-
-
-def get_data():
-    poses = []
-    images = []
-
-    with open(directory + dataset) as f:
-        for line in f:
-            fname, p0, p1, p2, p3, p4 = line.split(',')
-            p0 = float(p0)
-            p1 = float(p1)
-            p2 = float(p2)
-            p3 = float(p3)
-            p4 = float(p4)
-            #			p5 = 1
-            #			p5 = float(p5)
-            #			p6 = 1
-            #			p6 = float(p6)
-            poses.append((p0, p1, p2, p3, p4
-                          # ,p5,p6
-                          ))
-            images.append(directory + fname)
-    images = preprocess(images)
-    return datasource(images, poses)
+            images_list.append(directory + fname)
+    return datasource(images_list, poses)
 
 
 def train_validate_test_split(df, train_percent=.7, validate_percent=.15, seed=None):
@@ -167,13 +91,6 @@ def train_validate_test_split(df, train_percent=.7, validate_percent=.15, seed=N
     m = len(df.images)
     train_end = int(train_percent * m)
     validate_end = int(validate_percent * m) + train_end
-
-    # print("train_end: %d" % train_end)
-    # print(type(train_end))
-    # print("validate_end: %d" % validate_end)
-    # print(type(validate_end))
-    # print("perm: %d" % perm.shape)
-    # print(type(perm.shape))
 
     print("m: %d" % m)
     print(type(m))
@@ -232,6 +149,7 @@ def gen_data_batch(source):
         pose_q_batch = []
         for _ in range(batch_size):
             image, pose_x, pose_q = next(data_gen)
+            preprocess(image)
             image_batch.append(image)
             pose_x_batch.append(pose_x)
             pose_q_batch.append(pose_q)
